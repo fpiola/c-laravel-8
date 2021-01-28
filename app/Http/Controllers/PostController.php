@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUpdatePost;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
@@ -18,13 +19,13 @@ class PostController extends Controller
         return view('admin.posts.create');
     }
 
-    public function store(Request $requeste){
+    public function store(StoreUpdatePost $request){
         //$requeste = new Request();
         //dd($requeste->title); //Título
         //dd($requeste->all()); //Todos
 
         //Inserir no banco de dados
-        Post::create($requeste->all());
+        Post::create($request->all());
         //(Importante) colocar o fillable no model Post
 
         //return 'Okay';
