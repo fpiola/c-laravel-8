@@ -15,7 +15,7 @@ class PostController extends Controller
 
         //$posts = Post::paginate(1);
 
-        $posts = Post::orderBy('id','ASC')->paginate(1);
+        $posts = Post::orderBy('id', 'ASC')->paginate(1);
 
         return view('admin.posts.index', compact('posts'));
         //return view('admin.posts.index', ['posts' => $posts]);
@@ -85,8 +85,19 @@ class PostController extends Controller
         $post->update($request->all());
 
         return redirect()->route('posts.index')
-        ->with('message', 'Post Editado com Sucesso');
-
+            ->with('message', 'Post Editado com Sucesso');
     }
 
+    public function search(Request $request)
+    {
+        //dd("Pesquisando por {{$request->search}}");
+
+        $filters = $request->except('_token');
+
+        $posts = Post::where('title', 'LIKE', "%{$request->search}%")
+            ->orWhere('content', 'LIKE', "%{$request->search}%")
+            ->paginate(1);
+
+        return view('admin.posts.index', compact('posts', 'filters'));
+    }
 }
