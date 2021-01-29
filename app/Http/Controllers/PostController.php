@@ -8,18 +8,21 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         $posts = Post::all();
         //dd($posts);
         return view('admin.posts.index', compact('posts'));
         //return view('admin.posts.index', ['posts' => $posts]);
     }
 
-    public function create(){
+    public function create()
+    {
         return view('admin.posts.create');
     }
 
-    public function store(StoreUpdatePost $request){
+    public function store(StoreUpdatePost $request)
+    {
         //$requeste = new Request();
         //dd($requeste->title); //Título
         //dd($requeste->all()); //Todos
@@ -29,27 +32,56 @@ class PostController extends Controller
         //(Importante) colocar o fillable no model Post
 
         //return 'Okay';
-        return redirect()->route('posts.index');
-
+        return redirect()
+            ->route('posts.index')
+            ->with('message', 'Post Cadastrado com Sucesso');
     }
 
-    public function show($id){
+    public function show($id)
+    {
         //$post = Post::where('id', $id)->first();
         $post = Post::find($id);
-        if(!$post){
+        if (!$post) {
             return redirect()->route('posts.index');
         }
         return view('admin.posts.show', compact('post'));
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         //dd($id);
         $post = Post::find($id);
-        if(!$post){
+        if (!$post) {
             return redirect()->route('posts.index');
         }
         $post->delete();
         return redirect()->route('posts.index')
-        ->with('message','Post Deletado com Sucesso');
+            ->with('message', 'Post Deletado com Sucesso');
     }
+
+    public function edit($id)
+    {
+        //$post = Post::where('id', $id)->first();
+        $post = Post::find($id);
+        if (!$post) {
+            return redirect()->back();
+        }
+        return view('admin.posts.edit', compact('post'));
+    }
+
+    public function update($id, StoreUpdatePost $request)
+    {
+        //$post = Post::where('id', $id)->first();
+        $post = Post::find($id);
+        if (!$post) {
+            return redirect()->back();
+        }
+
+        $post->update($request->all());
+
+        return redirect()->route('posts.index')
+        ->with('message', 'Post Editado com Sucesso');
+
+    }
+
 }
