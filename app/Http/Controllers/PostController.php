@@ -113,7 +113,7 @@ class PostController extends Controller
 
         $data = $request->all();
 
-        if ($request->image->isValid()) {
+        if ($request->image && $request->image->isValid()) {
 
             if (Storage::exists('public/'.$post->image)) {
                 Storage::delete('public/'.$post->image);
