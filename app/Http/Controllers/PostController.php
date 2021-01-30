@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUpdatePost;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -28,13 +30,30 @@ class PostController extends Controller
 
     public function store(StoreUpdatePost $request)
     {
-        //$requeste = new Request();
-        //dd($requeste->title); //Título
-        //dd($requeste->all()); //Todos
+        //$request = new Request();
+        //dd($request->title); //Título
+        //dd($request->all()); //Todos
 
         //Inserir no banco de dados
-        Post::create($request->all());
+        //Post::create($request->all());
         //(Importante) colocar o fillable no model Post
+
+        //Upload
+        $data = $request->all();
+
+        if ($request->image->isValid()) {
+
+            $nameFile = Str::of($request->title)->slug('-') . '.' . $request->image->getClientOriginalExtension();
+
+            //$image = $request->image->storeAs('posts', $nameFile);
+
+            $image = Str::substr($request->image->storeAs('public/posts', $nameFile), 7);
+
+            $data['image'] = $image;
+        }
+
+        Post::create($data);
+
 
         //return 'Okay';
         return redirect()
@@ -56,10 +75,17 @@ class PostController extends Controller
     {
         //dd($id);
         $post = Post::find($id);
+
         if (!$post) {
             return redirect()->route('posts.index');
         }
+
+        if (Storage::exists('public/'.$post->image)) {
+            Storage::delete('public/'.$post->image);
+        }
+
         $post->delete();
+
         return redirect()->route('posts.index')
             ->with('message', 'Post Deletado com Sucesso');
     }
@@ -68,9 +94,11 @@ class PostController extends Controller
     {
         //$post = Post::where('id', $id)->first();
         $post = Post::find($id);
+
         if (!$post) {
             return redirect()->back();
         }
+
         return view('admin.posts.edit', compact('post'));
     }
 
@@ -78,11 +106,30 @@ class PostController extends Controller
     {
         //$post = Post::where('id', $id)->first();
         $post = Post::find($id);
+
         if (!$post) {
             return redirect()->back();
         }
 
-        $post->update($request->all());
+        $data = $request->all();
+
+        if ($request->image->isValid()) {
+
+            if (Storage::exists('public/'.$post->image)) {
+                Storage::delete('public/'.$post->image);
+            }
+
+            $nameFile = Str::of($request->title)->slug('-') . '.' . $request->image->getClientOriginalExtension();
+
+            //$image = $request->image->storeAs('posts', $nameFile);
+
+            $image = Str::substr($request->image->storeAs('public/posts', $nameFile), 7);
+
+            $data['image'] = $image;
+        }
+
+
+        $post->update($data);
 
         return redirect()->route('posts.index')
             ->with('message', 'Post Editado com Sucesso');
